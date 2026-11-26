@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StayWise NYC | Room Type Classifier</title>
+<style>
+  html { font-size: 15px; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(circle at 85% -10%, #2a2008 0, #101010 38%, #080808 100%);
+    color: #f3f0e8;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  .wrap { padding: 0.7rem 1.4rem 1rem; max-width: 1400px; margin: 0 auto; }
+
+  /* Top bar */
+  .topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 0.45rem; margin-bottom: 0.6rem; border-bottom: 1px solid #2c2c2c;
+  }
+  .brand { display: flex; align-items: center; gap: 0.6rem; font-size: 1.2rem; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; }
+  .brand small { font-size: 0.68rem; font-weight: 600; color: #a39d8e; letter-spacing: 1.5px; margin-left: 0.4rem; }
+  .bullet {
+    width: 30px; height: 30px; border-radius: 50%; background: #ffc629; color: #111;
+    display: inline-flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.95rem;
+  }
+  .pill {
+    border: 1px solid #383838; border-radius: 4px; padding: 0.2rem 0.7rem;
+    font-size: 0.68rem; color: #ffc629; letter-spacing: 1px; text-transform: uppercase; font-weight: 700;
+  }
+
+  /* Three cards side by side */
+  .grid { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 0.9rem; align-items: start; }
+  .card {
+    border: 1px solid #2c2c2c; border-top: 3px solid #ffc629; border-radius: 6px;
+    background: #141414; padding: 0.8rem 0.95rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .sec { font-size: 0.9rem; font-weight: 900; margin: 0 0 0.1rem 0; letter-spacing: 1.2px; text-transform: uppercase; }
+  .cap { font-size: 0.74rem; color: #a39d8e; margin: 0 0 0.6rem 0; }
+  .note { font-size: 0.74rem; color: #a39d8e; margin-top: 0.3rem; }
+  .disc { font-size: 0.68rem; color: #7d7869; margin-top: 0.7rem; }
+
+  /* Form */
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.6rem; }
+  label { display: block; font-size: 0.72rem; color: #a39d8e; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; }
+  input, select {
+    display: block; width: 100%; margin-top: 0.25rem; min-height: 2.3rem;
+    background: #1a1a1a; color: #f6f3ea; border: 1px solid #383838; border-radius: 5px;
+    padding: 0.4rem 0.55rem; font-size: 0.9rem; font-family: inherit;
+  }
+  input:focus, select:focus { outline: none; border-color: #ffc629; }
+  .btn {
+    width: 100%; margin-top: 0.4rem; min-height: 2.6rem; border: 0; border-radius: 5px;
+    color: #111; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; font-size: 0.9rem;
+    background: #ffc629; box-shadow: 0 6px 18px rgba(255,198,41,0.25); cursor: pointer;
+    transition: transform 0.16s, box-shadow 0.16s;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(255,198,41,0.4); background: #ffd25a; }
+
+  /* Result */
+  .center { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .tag {
+    display: inline-block; padding: 0.18rem 0.55rem; border-radius: 3px;
+    background: rgba(255,198,41,0.12); color: #ffc629; font-weight: 800;
+    font-size: 0.64rem; letter-spacing: 1.2px; text-transform: uppercase;
+  }
+  .bullet-big {
+    width: 76px; height: 76px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 2.1rem; margin: 0.6rem 0 0.45rem; color: #111; font-weight: 900;
+    animation: popIn 0.7s ease both;
+  }
+  .rname { font-size: 1.3rem; font-weight: 900; line-height: 1.15; text-transform: uppercase; letter-spacing: 0.8px; animation: fadeUp 0.7s 0.15s ease both; }
+  .pct { font-size: 2.7rem; font-weight: 900; line-height: 1.05; margin-top: 0.3rem; letter-spacing: -1px; animation: fadeUp 0.7s 0.25s ease both; }
+  .sub { font-size: 0.66rem; color: #a39d8e; letter-spacing: 1.5px; text-transform: uppercase; margin: 0.1rem 0 0.45rem; }
+  .bt { height: 10px; border-radius: 2px; background: #262626; overflow: hidden; width: 100%; }
+  .bf { height: 100%; border-radius: 2px; animation: grow 1s ease-out; }
+
+  /* Probability bars */
+  .bar { margin: 0.55rem 0; }
+  .bl { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.22rem; text-transform: uppercase; letter-spacing: 0.6px; }
+
+  /* Summary chips */
+  .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.7rem; }
+  .chip { border: 1px solid #2c2c2c; border-left: 3px solid #ffc629; border-radius: 3px; background: #1a1a1a; padding: 0.4rem 0.6rem; animation: fadeUp 0.6s 0.5s ease both; }
+  .chip-l { font-size: 0.6rem; color: #a39d8e; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 800; }
+  .chip-v { font-size: 0.85rem; font-weight: 700; margin-top: 0.1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  @keyframes grow { from { width: 0; } }
+  @keyframes popIn { 0% { opacity: 0; transform: scale(0.5); } 70% { transform: scale(1.12); } 100% { opacity: 1; transform: scale(1); } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand"><span class="bullet">S</span>StayWise NYC<small>Room type classifier</small></div>
+    <div class="pill" id="status">● Checking API…</div>
+  </div>
+
+  <div class="grid">
+    <!-- Card 1: inputs -->
+    <section class="card">
+      <div class="sec">Listing details</div>
+      <div class="cap">Enter the listing, then classify the room type.</div>
+      <form id="form">
+        <div class="row">
+          <label>Borough
+            <select id="neighbourhood_group">
+              <option>Manhattan</option>
+              <option selected>Brooklyn</option>
+              <option>Queens</option>
+              <option>Bronx</option>
+              <option>Staten Island</option>
+            </select>
+          </label>
+          <label>Neighbourhood
+            <input id="neighbourhood" list="hoods" value="Williamsburg">
+            <datalist id="hoods">
+              <option>Williamsburg</option><option>Bedford-Stuyvesant</option><option>Bushwick</option>
+              <option>Harlem</option><option>Upper West Side</option><option>Chelsea</option>
+              <option>East Village</option><option>Astoria</option>
+            </datalist>
+          </label>
+        </div>
+        <div class="row">
+          <label>Nightly price ($)<input id="price" type="number" min="0" max="10000" step="10" value="150"></label>
+          <label>Minimum nights<input id="minimum_nights" type="number" min="0" max="3650" step="1" value="3"></label>
+        </div>
+        <div class="row">
+          <label>Latitude<input id="latitude" type="number" min="40" max="41" step="0.001" value="40.745"></label>
+          <label>Longitude<input id="longitude" type="number" min="-75" max="-73" step="0.001" value="-73.985"></label>
+        </div>
+        <div class="row">
+          <label>Total reviews<input id="number_of_reviews" type="number" min="0" max="10000" step="1" value="10"></label>
+          <label>Reviews per month<input id="reviews_per_month" type="number" min="0" max="1000" step="0.5" value="1"></label>
+        </div>
+        <div class="row">
+          <label>Availability / year<input id="availability_365" type="number" min="0" max="365" step="1" value="180"></label>
+          <label>Host listings count<input id="calculated_host_listings_count" type="number" min="0" max="10000" step="1" value="1"></label>
+        </div>
+        <button class="btn" type="submit">Predict room type →</button>
+      </form>
+    </section>
+
+    <!-- Card 2: main result -->
+    <section class="card">
+      <div class="sec">Prediction</div>
+      <div class="cap">Most likely room type for this listing.</div>
+      <div id="result">
+        <div class="center">
+          <span class="tag">Ready for input</span>
+          <div class="bullet-big" style="background:#2a2a2a;color:#777;animation:none">?</div>
+          <div class="rname">Awaiting input</div>
+          <div class="note">Fill in the listing and press “Predict room type”.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Card 3: probabilities and summary -->
+    <section class="card">
+      <div class="sec">Class probabilities</div>
+      <div class="cap">How confident the model is in each room type.</div>
+      <div id="probs"></div>
+      <div id="summary"></div>
+      <div class="disc">Educational demo. Probabilities are model estimates, not a guarantee of the actual room type.</div>
+    </section>
+  </div>
+</div>
+
+<script>
+  const CLASS_COLOURS = { "Entire home/apt": "#ffc629", "Private room": "#ee352e", "Shared room": "#00a651" };
+  const CLASS_ICONS = { "Entire home/apt": "🏠", "Private room": "🛏️", "Shared room": "👥" };
+  const FALLBACK = ["#ffc629", "#ee352e", "#00a651", "#3b82f6"];
+
+  const form = document.getElementById("form");
+  const resultBox = document.getElementById("result");
+  const probBox = document.getElementById("probs");
+  const summaryBox = document.getElementById("summary");
+  const statusPill = document.getElementById("status");
+
+  // Escape text before putting it into HTML
+  function esc(text) {
+    return String(text).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function readNumber(id) {
+    return parseFloat(document.getElementById(id).value);
+  }
+
+  // Show whether the API is up (uses the /health endpoint)
+  fetch("/health")
+    .then((res) => res.json())
+    .then((data) => { statusPill.textContent = "● API ready"; })
+    .catch(() => { statusPill.textContent = "● API not reachable"; });
+
+  function renderResult(data, sent) {
+    const winner = data.room_type;
+    const probs = data.probabilities;
+    const confidence = probs[winner];
+    const colour = CLASS_COLOURS[winner] || FALLBACK[0];
+    const icon = CLASS_ICONS[winner] || "🏙️";
+
+    resultBox.innerHTML =
+      '<div class="center">' +
+      '<span class="tag">Most likely class</span>' +
+      '<div class="bullet-big" style="background:' + colour + ';box-shadow:0 0 24px ' + colour + '66">' + icon + '</div>' +
+      '<div class="rname">' + esc(winner) + '</div>' +
+      '<div class="pct" style="color:' + colour + '">' + Math.round(confidence * 100) + '%</div>' +
+      '<div class="sub">confidence</div>' +
+      '<div class="bt"><div class="bf" style="width:' + (confidence * 100).toFixed(1) + '%;background:' + colour + '"></div></div>' +
+      '<div class="note">Model probability for the predicted class</div>' +
+      '</div>';
+
+    // Bars for every class, highest first
+    const ordered = Object.entries(probs).sort((a, b) => b[1] - a[1]);
+    let bars = "";
+    ordered.forEach(([label, value], i) => {
+      const barColour = CLASS_COLOURS[label] || FALLBACK[i % FALLBACK.length];
+      bars +=
+        '<div class="bar"><div class="bl"><span>' + esc(label) + '</span><b>' + (value * 100).toFixed(1) + '%</b></div>' +
+        '<div class="bt"><div class="bf" style="width:' + (value * 100).toFixed(1) + '%;background:' + barColour + '"></div></div></div>';
+    });
+    probBox.innerHTML = bars;
+
+    summaryBox.innerHTML =
+      '<div class="chips">' +
+      '<div class="chip"><div class="chip-l">Borough</div><div class="chip-v">' + esc(sent.neighbourhood_group) + '</div></div>' +
+      '<div class="chip"><div class="chip-l">Neighbourhood</div><div class="chip-v">' + esc(sent.neighbourhood) + '</div></div>' +
+      '<div class="chip"><div class="chip-l">Price / night</div><div class="chip-v">$' + Math.round(sent.price).toLocaleString() + '</div></div>' +
+      '<div class="chip"><div class="chip-l">Min nights</div><div class="chip-v">' + sent.minimum_nights + '</div></div>' +
+      '</div>';
+  }
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    // Same 10 fields the API's Listing model expects
+    const body = {
+      neighbourhood_group: document.getElementById("neighbourhood_group").value,
+      neighbourhood: document.getElementById("neighbourhood").value.trim(),
+      latitude: readNumber("latitude"),
+      longitude: readNumber("longitude"),
+      price: readNumber("price"),
+      minimum_nights: readNumber("minimum_nights"),
+      number_of_reviews: readNumber("number_of_reviews"),
+      reviews_per_month: readNumber("reviews_per_month"),
+      calculated_host_listings_count: readNumber("calculated_host_listings_count"),
+      availability_365: readNumber("availability_365"),
+    };
+
+    resultBox.innerHTML = '<div class="center"><span class="tag">Predicting…</span></div>';
+
+    try {
+      const res = await fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        throw new Error("API returned " + res.status + ". Check the input values.");
+      }
+      const data = await res.json();
+      renderResult(data, body);
+    } catch (err) {
+      resultBox.innerHTML = '<div class="center"><div class="note">Prediction failed: ' + esc(err.message) + '</div></div>';
+    }
+  });
+</script>
+</body>
+</html>

@@ -106,3 +106,5 @@ reports/figures/confusion_matrix.png
 
 # DotEnv configuration
 .env
+
+__pycache__
