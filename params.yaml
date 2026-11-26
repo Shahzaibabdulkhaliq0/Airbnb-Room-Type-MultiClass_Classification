@@ -44,7 +44,11 @@ tune_model:
     Gradient Boosting:
       classifier__n_estimators: [100, 200]
       classifier__max_depth: [3, 5]
-      
+
+evaluate_model:
+  TARGET: room_type
+  REGISTERED_MODEL_NAME: my_model
+  
 mlflow:
   TRACKING_URI: https://dagshub.com/Shahzaibabdulkhaliq0/Airbnb-Room-Type-MultiClass_Classification.mlflow
   EXPERIMENT_NAME: Airbnb
