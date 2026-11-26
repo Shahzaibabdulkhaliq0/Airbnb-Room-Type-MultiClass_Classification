@@ -27,6 +27,46 @@ stages:
       hash: md5
       md5: c436b3fbb150c630d5bf455e3b79fdbc
       size: 7126583
+  validate_data:
+    cmd: python src/data/validate_data.py
+    deps:
+    - path: data/interim/cleaned_data.csv
+      hash: md5
+      md5: 29d56862068ad06d10940e5e6d34bcca
+      size: 3633955
+    - path: src/data/validate_data.py
+      hash: md5
+      md5: 60d9704820faa0644c59c6ecf2fb88b9
+      size: 1912
+    params:
+      params.yaml:
+        validate_data:
+          REQUIRED_COLUMNS:
+          - latitude
+          - longitude
+          - price
+          - minimum_nights
+          - number_of_reviews
+          - reviews_per_month
+          - calculated_host_listings_count
+          - availability_365
+          - room_type
+          - neighbourhood_group
+          - neighbourhood
+          MIN_ROWS: 1000
+          MIN_PRICE: 0
+          MIN_AVAILABILITY: 0
+          MAX_AVAILABILITY: 365
+          ALLOWED_ROOM_TYPES:
+          - Entire home/apt
+          - Private room
+          - Shared room
+          MAX_NULL_SHARE: 0.5
+    outs:
+    - path: reports/data_validation.json
+      hash: md5
+      md5: d966893bb4f31479896e83f80a4e40c4
+      size: 224
   build_features:
     cmd: python src/features/build_features.py
     deps:
@@ -213,46 +253,6 @@ stages:
       hash: md5
       md5: d6d7bcf6aa84b72353bf359184bfb9a6
       size: 87
-  validate_data:
-    cmd: python src/data/validate_data.py
-    deps:
-    - path: data/interim/cleaned_data.csv
-      hash: md5
-      md5: 29d56862068ad06d10940e5e6d34bcca
-      size: 3633955
-    - path: src/data/validate_data.py
-      hash: md5
-      md5: 60d9704820faa0644c59c6ecf2fb88b9
-      size: 1912
-    params:
-      params.yaml:
-        validate_data:
-          REQUIRED_COLUMNS:
-          - latitude
-          - longitude
-          - price
-          - minimum_nights
-          - number_of_reviews
-          - reviews_per_month
-          - calculated_host_listings_count
-          - availability_365
-          - room_type
-          - neighbourhood_group
-          - neighbourhood
-          MIN_ROWS: 1000
-          MIN_PRICE: 0
-          MIN_AVAILABILITY: 0
-          MAX_AVAILABILITY: 365
-          ALLOWED_ROOM_TYPES:
-          - Entire home/apt
-          - Private room
-          - Shared room
-          MAX_NULL_SHARE: 0.5
-    outs:
-    - path: reports/data_validation.json
-      hash: md5
-      md5: d966893bb4f31479896e83f80a4e40c4
-      size: 224
   check_drift:
     cmd: python src/data/check_drift.py
     deps:
