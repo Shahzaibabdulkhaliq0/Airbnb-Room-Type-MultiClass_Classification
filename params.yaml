@@ -19,3 +19,12 @@ build_features:
   RANDOM_STATE: 42
   PRICE_CAP_QUANTILE: 0.99
   MIN_NIGHTS_CAP_QUANTILE: 0.99
+
+train_model:
+  TARGET: room_type
+  RANDOM_STATE: 42
+  CV_FOLDS: 3
+
+mlflow:
+  TRACKING_URI: https://dagshub.com/Shahzaibabdulkhaliq0/Airbnb-Room-Type-MultiClass_Classification.mlflow
+  EXPERIMENT_NAME: Airbnb
