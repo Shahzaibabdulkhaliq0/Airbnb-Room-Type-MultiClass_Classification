@@ -1,0 +1,101 @@
+stages:
+  make_dataset:
+    cmd: python src/data/make_dataset.py
+    deps:
+      - src/data/make_dataset.py
+    params:
+      - make_dataset.S3_BUCKET
+      - make_dataset.S3_KEY
+      - make_dataset.DROP_COLUMNS
+      - make_dataset.FILL_REVIEWS_PER_MONTH
+    outs:
+      - data/raw/AB_NYC_2019.csv
+      - data/interim/cleaned_data.csv
+
+  validate_data:
+    cmd: python src/data/validate_data.py
+    deps:
+      - data/interim/cleaned_data.csv
+      - src/data/validate_data.py
+    params:
+      - validate_data
+    outs:
+      - reports/data_validation.json
+
+  build_features:
+    cmd: python src/features/build_features.py
+    deps:
+      - data/interim/cleaned_data.csv
+      - reports/data_validation.json
+      - src/features/build_features.py
+    params:
+      - build_features.TARGET
+      - build_features.TEST_SIZE
+      - build_features.RANDOM_STATE
+      - build_features.PRICE_CAP_QUANTILE
+      - build_features.MIN_NIGHTS_CAP_QUANTILE
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+      - models/caps.json
+      - reports/baseline_stats.json
+
+  train_model:
+    cmd: python src/model/train_model.py
+    deps:
+      - data/processed/train.csv
+      - src/model/train_model.py
+    params:
+      - train_model.TARGET
+      - train_model.RANDOM_STATE
+      - train_model.CV_FOLDS
+      - mlflow.TRACKING_URI
+      - mlflow.EXPERIMENT_NAME
+    outs:
+      - models/untrained_pipeline.joblib
+      - models/best_model_name.txt
+      - reports/model_comparison.csv
+
+  tune_model:
+    cmd: python src/model/tune_model.py
+    deps:
+      - data/processed/train.csv
+      - models/untrained_pipeline.joblib
+      - models/best_model_name.txt
+      - src/model/tune_model.py
+    params:
+      - tune_model
+      - mlflow.TRACKING_URI
+      - mlflow.EXPERIMENT_NAME
+    outs:
+      - models/best_model.joblib
+      - reports/best_params.json
+      - reports/run_info.json
+
+  evaluate_model:
+    cmd: python src/model/evaluate_model.py
+    deps:
+      - data/processed/test.csv
+      - models/best_model.joblib
+      - reports/run_info.json
+      - src/model/evaluate_model.py
+    params:
+      - evaluate_model.REGISTERED_MODEL_NAME
+      - mlflow.TRACKING_URI
+      - mlflow.EXPERIMENT_NAME
+    metrics:
+      - reports/metrics.json:
+          cache: false
+    outs:
+      - reports/figures/confusion_matrix.png
+
+  check_drift:
+    cmd: python src/data/check_drift.py
+    deps:
+      - data/interim/cleaned_data.csv
+      - reports/baseline_stats.json
+      - src/data/check_drift.py
+    params:
+      - check_drift
+    outs:
+      - reports/drift_report.json

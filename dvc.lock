@@ -1,0 +1,280 @@
+schema: '2.0'
+stages:
+  make_dataset:
+    cmd: python src/data/make_dataset.py
+    deps:
+    - path: src/data/make_dataset.py
+      hash: md5
+      md5: 260dfe33a7d87e3ebfe2abf877999b9c
+      size: 1819
+    params:
+      params.yaml:
+        make_dataset.DROP_COLUMNS:
+        - id
+        - name
+        - host_id
+        - host_name
+        - last_review
+        make_dataset.FILL_REVIEWS_PER_MONTH: 0
+        make_dataset.S3_BUCKET: airbnb-project-s3-bucket
+        make_dataset.S3_KEY: AB_NYC_2019.csv
+    outs:
+    - path: data/interim/cleaned_data.csv
+      hash: md5
+      md5: 29d56862068ad06d10940e5e6d34bcca
+      size: 3633955
+    - path: data/raw/AB_NYC_2019.csv
+      hash: md5
+      md5: c436b3fbb150c630d5bf455e3b79fdbc
+      size: 7126583
+  build_features:
+    cmd: python src/features/build_features.py
+    deps:
+    - path: data/interim/cleaned_data.csv
+      hash: md5
+      md5: 29d56862068ad06d10940e5e6d34bcca
+      size: 3633955
+    - path: reports/data_validation.json
+      hash: md5
+      md5: d966893bb4f31479896e83f80a4e40c4
+      size: 224
+    - path: src/features/build_features.py
+      hash: md5
+      md5: dc621e7e9c31fe670a8d96500dfacf7e
+      size: 3433
+    params:
+      params.yaml:
+        build_features.MIN_NIGHTS_CAP_QUANTILE: 0.99
+        build_features.PRICE_CAP_QUANTILE: 0.99
+        build_features.RANDOM_STATE: 42
+        build_features.TARGET: room_type
+        build_features.TEST_SIZE: 0.2
+    outs:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 101de4fcf2046c045bbe95f3bb65200f
+      size: 727047
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 924e944739514e94e8560ac41ee4dbd6
+      size: 2906585
+    - path: models/caps.json
+      hash: md5
+      md5: 4f42ab5b00af2a5faf4b3131485695bf
+      size: 53
+    - path: reports/baseline_stats.json
+      hash: md5
+      md5: ab15aed49c79c45a6a7e6bed45654c30
+      size: 215
+  train_model:
+    cmd: python src/model/train_model.py
+    deps:
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 924e944739514e94e8560ac41ee4dbd6
+      size: 2906585
+    - path: src/model/train_model.py
+      hash: md5
+      md5: 32f99ad1f19166f5c7654030e2586ccc
+      size: 6787
+    params:
+      params.yaml:
+        mlflow.EXPERIMENT_NAME: Airbnb
+        mlflow.TRACKING_URI: 
+          https://dagshub.com/Shahzaibabdulkhaliq0/Airbnb-Room-Type-MultiClass_Classification.mlflow
+        train_model.CV_FOLDS: 3
+        train_model.RANDOM_STATE: 42
+        train_model.TARGET: room_type
+    outs:
+    - path: models/best_model_name.txt
+      hash: md5
+      md5: 3a9d79e0ebc92f982454266a27d1e9a4
+      size: 13
+    - path: models/untrained_pipeline.joblib
+      hash: md5
+      md5: df13356b0cb2da2153ac932309b29846
+      size: 1849
+    - path: reports/model_comparison.csv
+      hash: md5
+      md5: 709c90ef58555af95781a23f10333a12
+      size: 467
+  tune_model:
+    cmd: python src/model/tune_model.py
+    deps:
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 924e944739514e94e8560ac41ee4dbd6
+      size: 2906585
+    - path: models/best_model_name.txt
+      hash: md5
+      md5: 3a9d79e0ebc92f982454266a27d1e9a4
+      size: 13
+    - path: models/untrained_pipeline.joblib
+      hash: md5
+      md5: df13356b0cb2da2153ac932309b29846
+      size: 1849
+    - path: src/model/tune_model.py
+      hash: md5
+      md5: 0886d0d1207f3b92eb6ff1e673fce028
+      size: 5240
+    params:
+      params.yaml:
+        mlflow.EXPERIMENT_NAME: Airbnb
+        mlflow.TRACKING_URI: 
+          https://dagshub.com/Shahzaibabdulkhaliq0/Airbnb-Room-Type-MultiClass_Classification.mlflow
+        tune_model:
+          TARGET: room_type
+          RANDOM_STATE: 42
+          CV_FOLDS: 3
+          N_ITER: 10
+          SCORING: f1_macro
+          PARAM_GRIDS:
+            Logistic Regression:
+              classifier__C:
+              - 0.1
+              - 1
+              - 10
+            Decision Tree:
+              classifier__max_depth:
+              - 5
+              - 10
+              - 
+              classifier__min_samples_split:
+              - 2
+              - 5
+              - 10
+            Random Forest:
+              classifier__n_estimators:
+              - 100
+              - 150
+              - 200
+              - 300
+              classifier__max_depth:
+              - 8
+              - 12
+              - 15
+              - 20
+              - 
+              classifier__min_samples_split:
+              - 2
+              - 5
+              - 10
+            Gradient Boosting:
+              classifier__n_estimators:
+              - 100
+              - 200
+              classifier__max_depth:
+              - 3
+              - 5
+    outs:
+    - path: models/best_model.joblib
+      hash: md5
+      md5: 8a2d2aa3264d09ea97444b54d6a487a9
+      size: 168402355
+    - path: reports/best_params.json
+      hash: md5
+      md5: 8cc7e4e53ce14ae560b86cb284624e00
+      size: 235
+    - path: reports/run_info.json
+      hash: md5
+      md5: e7e1787169b9667ed64541efb54f099c
+      size: 146
+  evaluate_model:
+    cmd: python src/model/evaluate_model.py
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 101de4fcf2046c045bbe95f3bb65200f
+      size: 727047
+    - path: models/best_model.joblib
+      hash: md5
+      md5: 8a2d2aa3264d09ea97444b54d6a487a9
+      size: 168402355
+    - path: reports/run_info.json
+      hash: md5
+      md5: e7e1787169b9667ed64541efb54f099c
+      size: 146
+    - path: src/model/evaluate_model.py
+      hash: md5
+      md5: 1b40a0b564060172e7cb3e05982edee6
+      size: 4970
+    params:
+      params.yaml:
+        evaluate_model.REGISTERED_MODEL_NAME: my_model
+        mlflow.EXPERIMENT_NAME: Airbnb
+        mlflow.TRACKING_URI: 
+          https://dagshub.com/Shahzaibabdulkhaliq0/Airbnb-Room-Type-MultiClass_Classification.mlflow
+    outs:
+    - path: reports/figures/confusion_matrix.png
+      hash: md5
+      md5: 0427417f1d5840f2b135cdbc2a4d2b33
+      size: 25728
+    - path: reports/metrics.json
+      hash: md5
+      md5: d6d7bcf6aa84b72353bf359184bfb9a6
+      size: 87
+  validate_data:
+    cmd: python src/data/validate_data.py
+    deps:
+    - path: data/interim/cleaned_data.csv
+      hash: md5
+      md5: 29d56862068ad06d10940e5e6d34bcca
+      size: 3633955
+    - path: src/data/validate_data.py
+      hash: md5
+      md5: 60d9704820faa0644c59c6ecf2fb88b9
+      size: 1912
+    params:
+      params.yaml:
+        validate_data:
+          REQUIRED_COLUMNS:
+          - latitude
+          - longitude
+          - price
+          - minimum_nights
+          - number_of_reviews
+          - reviews_per_month
+          - calculated_host_listings_count
+          - availability_365
+          - room_type
+          - neighbourhood_group
+          - neighbourhood
+          MIN_ROWS: 1000
+          MIN_PRICE: 0
+          MIN_AVAILABILITY: 0
+          MAX_AVAILABILITY: 365
+          ALLOWED_ROOM_TYPES:
+          - Entire home/apt
+          - Private room
+          - Shared room
+          MAX_NULL_SHARE: 0.5
+    outs:
+    - path: reports/data_validation.json
+      hash: md5
+      md5: d966893bb4f31479896e83f80a4e40c4
+      size: 224
+  check_drift:
+    cmd: python src/data/check_drift.py
+    deps:
+    - path: data/interim/cleaned_data.csv
+      hash: md5
+      md5: 29d56862068ad06d10940e5e6d34bcca
+      size: 3633955
+    - path: reports/baseline_stats.json
+      hash: md5
+      md5: ab15aed49c79c45a6a7e6bed45654c30
+      size: 215
+    - path: src/data/check_drift.py
+      hash: md5
+      md5: 77a738fcfbf1ef55cc822113bef38501
+      size: 2244
+    params:
+      params.yaml:
+        check_drift:
+          MAX_PRICE_MEAN_CHANGE: 0.2
+          MAX_ROOM_TYPE_SHARE_CHANGE: 0.1
+    outs:
+    - path: reports/drift_report.json
+      hash: md5
+      md5: b789fb01b31e26381e76cc96fa6c1a68
+      size: 341
