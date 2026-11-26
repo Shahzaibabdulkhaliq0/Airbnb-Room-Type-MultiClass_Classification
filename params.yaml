@@ -12,3 +12,10 @@ validate_data:
   MAX_AVAILABILITY: 365
   ALLOWED_ROOM_TYPES: [Entire home/apt, Private room, Shared room]
   MAX_NULL_SHARE: 0.5
+
+build_features:
+  TARGET: room_type
+  TEST_SIZE: 0.2
+  RANDOM_STATE: 42
+  PRICE_CAP_QUANTILE: 0.99
+  MIN_NIGHTS_CAP_QUANTILE: 0.99

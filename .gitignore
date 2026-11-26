@@ -90,3 +90,5 @@ target/
 
 # Manually Ignored
 reports/data_validation.json
+models/caps.json
+reports/baseline_stats.json
