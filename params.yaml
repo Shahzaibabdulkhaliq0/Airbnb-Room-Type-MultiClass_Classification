@@ -20,6 +20,11 @@ build_features:
   PRICE_CAP_QUANTILE: 0.99
   MIN_NIGHTS_CAP_QUANTILE: 0.99
 
+check_drift:
+  # Warning only: the pipeline keeps running, the report says if drift was found
+  MAX_PRICE_MEAN_CHANGE: 0.20
+  MAX_ROOM_TYPE_SHARE_CHANGE: 0.10
+
 train_model:
   TARGET: room_type
   RANDOM_STATE: 42
