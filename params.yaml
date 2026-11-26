@@ -48,6 +48,10 @@ tune_model:
 evaluate_model:
   TARGET: room_type
   REGISTERED_MODEL_NAME: my_model
+
+quality_gate:
+  MIN_TEST_ACCURACY: 0.70
+  MIN_TEST_MACRO_F1: 0.55
   
 mlflow:
   TRACKING_URI: https://dagshub.com/Shahzaibabdulkhaliq0/Airbnb-Room-Type-MultiClass_Classification.mlflow
