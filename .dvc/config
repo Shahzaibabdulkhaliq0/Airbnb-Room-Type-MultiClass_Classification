@@ -1,0 +1,4 @@
+[core]
+    remote = airbnb
+['remote "airbnb"']
+    url = s3://airbnb-project-s3-bucket
