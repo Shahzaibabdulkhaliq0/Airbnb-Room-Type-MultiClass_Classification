@@ -3,3 +3,12 @@ make_dataset:
   S3_KEY: AB_NYC_2019.csv
   DROP_COLUMNS: [id, name, host_id, host_name, last_review]
   FILL_REVIEWS_PER_MONTH: 0
+
+validate_data:
+  REQUIRED_COLUMNS: [latitude, longitude, price, minimum_nights, number_of_reviews, reviews_per_month, calculated_host_listings_count, availability_365, room_type, neighbourhood_group, neighbourhood]
+  MIN_ROWS: 1000
+  MIN_PRICE: 0
+  MIN_AVAILABILITY: 0
+  MAX_AVAILABILITY: 365
+  ALLOWED_ROOM_TYPES: [Entire home/apt, Private room, Shared room]
+  MAX_NULL_SHARE: 0.5
