@@ -25,6 +25,26 @@ train_model:
   RANDOM_STATE: 42
   CV_FOLDS: 3
 
+tune_model:
+  TARGET: room_type
+  RANDOM_STATE: 42
+  CV_FOLDS: 3
+  N_ITER: 10
+  SCORING: f1_macro
+  PARAM_GRIDS:
+    Logistic Regression:
+      classifier__C: [0.1, 1, 10]
+    Decision Tree:
+      classifier__max_depth: [5, 10, null]
+      classifier__min_samples_split: [2, 5, 10]
+    Random Forest:
+      classifier__n_estimators: [100, 150, 200, 300]
+      classifier__max_depth: [8, 12, 15, 20, null]
+      classifier__min_samples_split: [2, 5, 10]
+    Gradient Boosting:
+      classifier__n_estimators: [100, 200]
+      classifier__max_depth: [3, 5]
+      
 mlflow:
   TRACKING_URI: https://dagshub.com/Shahzaibabdulkhaliq0/Airbnb-Room-Type-MultiClass_Classification.mlflow
   EXPERIMENT_NAME: Airbnb
