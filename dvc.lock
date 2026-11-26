@@ -5,8 +5,8 @@ stages:
     deps:
     - path: src/data/make_dataset.py
       hash: md5
-      md5: 260dfe33a7d87e3ebfe2abf877999b9c
-      size: 1819
+      md5: 0c0ddb725de30f63404e22807f278778
+      size: 1764
     params:
       params.yaml:
         make_dataset.DROP_COLUMNS:
@@ -21,8 +21,8 @@ stages:
     outs:
     - path: data/interim/cleaned_data.csv
       hash: md5
-      md5: 29d56862068ad06d10940e5e6d34bcca
-      size: 3633955
+      md5: aae6bd8dd350e8f2647cf2223ba04bdb
+      size: 3585059
     - path: data/raw/AB_NYC_2019.csv
       hash: md5
       md5: c436b3fbb150c630d5bf455e3b79fdbc
@@ -32,12 +32,12 @@ stages:
     deps:
     - path: data/interim/cleaned_data.csv
       hash: md5
-      md5: 29d56862068ad06d10940e5e6d34bcca
-      size: 3633955
+      md5: aae6bd8dd350e8f2647cf2223ba04bdb
+      size: 3585059
     - path: src/data/validate_data.py
       hash: md5
-      md5: 60d9704820faa0644c59c6ecf2fb88b9
-      size: 1912
+      md5: 56f051e3b594aecfcb64f9996c4d45ef
+      size: 1865
     params:
       params.yaml:
         validate_data:
@@ -65,23 +65,23 @@ stages:
     outs:
     - path: reports/data_validation.json
       hash: md5
-      md5: d966893bb4f31479896e83f80a4e40c4
-      size: 224
+      md5: 0b47e46efbabe8e0f51fb2c50a62015a
+      size: 215
   build_features:
     cmd: python src/features/build_features.py
     deps:
     - path: data/interim/cleaned_data.csv
       hash: md5
-      md5: 29d56862068ad06d10940e5e6d34bcca
-      size: 3633955
+      md5: aae6bd8dd350e8f2647cf2223ba04bdb
+      size: 3585059
     - path: reports/data_validation.json
       hash: md5
-      md5: d966893bb4f31479896e83f80a4e40c4
-      size: 224
+      md5: 0b47e46efbabe8e0f51fb2c50a62015a
+      size: 215
     - path: src/features/build_features.py
       hash: md5
-      md5: dc621e7e9c31fe670a8d96500dfacf7e
-      size: 3433
+      md5: 73417fca64910162a01043497cff670c
+      size: 3348
     params:
       params.yaml:
         build_features.MIN_NIGHTS_CAP_QUANTILE: 0.99
@@ -92,31 +92,31 @@ stages:
     outs:
     - path: data/processed/test.csv
       hash: md5
-      md5: 101de4fcf2046c045bbe95f3bb65200f
-      size: 727047
+      md5: fe220f6d280f53926658ad031a0bffa3
+      size: 717267
     - path: data/processed/train.csv
       hash: md5
-      md5: 924e944739514e94e8560ac41ee4dbd6
-      size: 2906585
+      md5: b00ca5807bd154e82ee65fdf7f2c3e1e
+      size: 2867468
     - path: models/caps.json
       hash: md5
-      md5: 4f42ab5b00af2a5faf4b3131485695bf
-      size: 53
+      md5: 28e52bc98b4a8ee82aec195e642b56b3
+      size: 50
     - path: reports/baseline_stats.json
       hash: md5
-      md5: ab15aed49c79c45a6a7e6bed45654c30
-      size: 215
+      md5: 42c3858704d2c56b7d23d472015b55dd
+      size: 208
   train_model:
     cmd: python src/model/train_model.py
     deps:
     - path: data/processed/train.csv
       hash: md5
-      md5: 924e944739514e94e8560ac41ee4dbd6
-      size: 2906585
+      md5: b00ca5807bd154e82ee65fdf7f2c3e1e
+      size: 2867468
     - path: src/model/train_model.py
       hash: md5
-      md5: 32f99ad1f19166f5c7654030e2586ccc
-      size: 6787
+      md5: 4bc9ff801406a29989a54ebba6b0067b
+      size: 6622
     params:
       params.yaml:
         mlflow.EXPERIMENT_NAME: Airbnb
@@ -136,15 +136,15 @@ stages:
       size: 1849
     - path: reports/model_comparison.csv
       hash: md5
-      md5: 709c90ef58555af95781a23f10333a12
-      size: 467
+      md5: 8841077bfc252edcd4e563d917905744
+      size: 461
   tune_model:
     cmd: python src/model/tune_model.py
     deps:
     - path: data/processed/train.csv
       hash: md5
-      md5: 924e944739514e94e8560ac41ee4dbd6
-      size: 2906585
+      md5: b00ca5807bd154e82ee65fdf7f2c3e1e
+      size: 2867468
     - path: models/best_model_name.txt
       hash: md5
       md5: 3a9d79e0ebc92f982454266a27d1e9a4
@@ -155,8 +155,8 @@ stages:
       size: 1849
     - path: src/model/tune_model.py
       hash: md5
-      md5: 0886d0d1207f3b92eb6ff1e673fce028
-      size: 5240
+      md5: 198359393fdbf17257fb925610ad2dc0
+      size: 5101
     params:
       params.yaml:
         mlflow.EXPERIMENT_NAME: Airbnb
@@ -209,35 +209,35 @@ stages:
     outs:
     - path: models/best_model.joblib
       hash: md5
-      md5: 8a2d2aa3264d09ea97444b54d6a487a9
-      size: 168402355
+      md5: 81f0b7298ee075a2bff491d6448ec43c
+      size: 168402387
     - path: reports/best_params.json
       hash: md5
-      md5: 8cc7e4e53ce14ae560b86cb284624e00
-      size: 235
+      md5: ee568a294eb04cec63384707b2e7dbb7
+      size: 227
     - path: reports/run_info.json
       hash: md5
-      md5: e7e1787169b9667ed64541efb54f099c
-      size: 146
+      md5: 5fd2bf0caeecf7ff29d581056534ccd9
+      size: 142
   evaluate_model:
     cmd: python src/model/evaluate_model.py
     deps:
     - path: data/processed/test.csv
       hash: md5
-      md5: 101de4fcf2046c045bbe95f3bb65200f
-      size: 727047
+      md5: fe220f6d280f53926658ad031a0bffa3
+      size: 717267
     - path: models/best_model.joblib
       hash: md5
-      md5: 8a2d2aa3264d09ea97444b54d6a487a9
-      size: 168402355
+      md5: 81f0b7298ee075a2bff491d6448ec43c
+      size: 168402387
     - path: reports/run_info.json
       hash: md5
-      md5: e7e1787169b9667ed64541efb54f099c
-      size: 146
+      md5: 5fd2bf0caeecf7ff29d581056534ccd9
+      size: 142
     - path: src/model/evaluate_model.py
       hash: md5
-      md5: 1b40a0b564060172e7cb3e05982edee6
-      size: 4970
+      md5: 8de1eb16035542b5a08917b821e0b880
+      size: 4831
     params:
       params.yaml:
         evaluate_model.REGISTERED_MODEL_NAME: my_model
@@ -247,27 +247,27 @@ stages:
     outs:
     - path: reports/figures/confusion_matrix.png
       hash: md5
-      md5: 0427417f1d5840f2b135cdbc2a4d2b33
-      size: 25728
+      md5: e352df4520f16494062f4ea467a907df
+      size: 28723
     - path: reports/metrics.json
       hash: md5
-      md5: d6d7bcf6aa84b72353bf359184bfb9a6
-      size: 87
+      md5: 2c87dffc178346b4a743a6e36b774f51
+      size: 84
   check_drift:
     cmd: python src/data/check_drift.py
     deps:
     - path: data/interim/cleaned_data.csv
       hash: md5
-      md5: 29d56862068ad06d10940e5e6d34bcca
-      size: 3633955
+      md5: aae6bd8dd350e8f2647cf2223ba04bdb
+      size: 3585059
     - path: reports/baseline_stats.json
       hash: md5
-      md5: ab15aed49c79c45a6a7e6bed45654c30
-      size: 215
+      md5: 42c3858704d2c56b7d23d472015b55dd
+      size: 208
     - path: src/data/check_drift.py
       hash: md5
-      md5: 77a738fcfbf1ef55cc822113bef38501
-      size: 2244
+      md5: f6492a2aeabe5cd4511a3c733087760d
+      size: 2187
     params:
       params.yaml:
         check_drift:
@@ -276,5 +276,5 @@ stages:
     outs:
     - path: reports/drift_report.json
       hash: md5
-      md5: b789fb01b31e26381e76cc96fa6c1a68
-      size: 341
+      md5: f327fa0fccbfe70a2548c7d32e03110d
+      size: 331
